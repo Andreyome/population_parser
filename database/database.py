@@ -19,6 +19,6 @@ class Base(DeclarativeBase):
 
 
 async def init_db():
-    from models import Country
+    from models.models import Country
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

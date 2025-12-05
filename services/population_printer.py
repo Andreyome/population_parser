@@ -2,8 +2,8 @@ import asyncio
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import aliased
-from database import SessionLocal, init_db
-from models import Country
+from database.database import SessionLocal, init_db
+from models.models import Country
 
 
 class PrintDataService:

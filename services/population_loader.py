@@ -5,8 +5,8 @@ from bs4 import BeautifulSoup
 from sqlalchemy.dialects.postgresql import insert
 import asyncio
 
-from database import SessionLocal, init_db
-from models import Country
+from database.database import SessionLocal, init_db
+from models.models import Country
 
 
 class CountryScraper:
