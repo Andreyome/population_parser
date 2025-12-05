@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, BigInteger
 
-from database import Base
+from database.database import Base
 
 
 class Country(Base):

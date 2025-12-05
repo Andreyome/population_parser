@@ -4,9 +4,9 @@ import requests
 from bs4 import BeautifulSoup
 from sqlalchemy.dialects.postgresql import insert
 
-from database import SessionLocal, init_db
-from models import Country
-from wait_for_db import wait_for_db
+from database.database import SessionLocal, init_db
+from models.models import Country
+from utils.wait_for_db import wait_for_db
 
 
 class CountryScraper:

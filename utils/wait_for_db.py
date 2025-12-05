@@ -1,5 +1,5 @@
 import time
-from database import DATABASE_URL
+from database.database import DATABASE_URL
 from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError
 

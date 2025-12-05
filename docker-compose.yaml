@@ -3,9 +3,9 @@ services:
     image: postgres:16.0-alpine3.17
     container_name: population
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: populations_db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
@@ -14,21 +14,20 @@ services:
 
   get_data:
     build: .
-    command: python get_data.py
+    command: python -m services.population_loader
     depends_on:
       - postgres
     environment:
-      #      TARGET_URL: "https://en.wikipedia.org/w/index.php?title=List_of_countries_by_population_(United_Nations)&oldid=1215058959"
-      TARGET_URL: "https://statisticstimes.com/demographics/countries-by-population.php"
-      DATABASE_URL: postgresql+psycopg2://postgres:postgres@postgres:5432/populations_db
+      TARGET_URL: ${TARGET_URL}
+      DATABASE_URL: ${DATABASE_URL}
 
   print_data:
     build: .
-    command: python print_data.py
+    command: python -m services.population_printer
     depends_on:
       - postgres
     environment:
-      DATABASE_URL: postgresql+psycopg2://postgres:postgres@postgres:5432/populations_db
+      DATABASE_URL: ${DATABASE_URL}
 
 volumes:
   my_db:

@@ -9,7 +9,7 @@
 | BeautifulSoup4 |                        |                |
 
 ## How to run:
-
+Edit .env to provide necessary configuration values
 ```bash
 git clone https://github.com/Andreyome/population_parser.git
 docker-compose up get_data 

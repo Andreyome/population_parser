@@ -4,8 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql+psycopg2://postgres:postgres@postgres:5432/populations_db"
+    "DATABASE_URL"
 )
 
 engine = create_engine(
@@ -27,5 +26,5 @@ class Base(DeclarativeBase):
 
 
 def init_db():
-    from models import Country
+    from models.models import Country
     Base.metadata.create_all(bind=engine)
