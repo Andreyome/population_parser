@@ -21,6 +21,7 @@ SessionLocal = sessionmaker(
     future=True
 )
 
+
 class Base(DeclarativeBase):
     pass
 
