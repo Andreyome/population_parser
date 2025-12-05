@@ -11,24 +11,31 @@ services:
     volumes:
       - my_db:/var/lib/postgresql/data
     restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d populations_db" ]
+      interval: 2s
+      timeout: 3s
+      retries: 15
 
   get_data:
     build: .
     command: python get_data.py
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     environment:
-#      TARGET_URL: "https://en.wikipedia.org/w/index.php?title=List_of_countries_by_population_(United_Nations)&oldid=1215058959"
+      #      TARGET_URL: "https://en.wikipedia.org/w/index.php?title=List_of_countries_by_population_(United_Nations)&oldid=1215058959"
       TARGET_URL: "https://statisticstimes.com/demographics/countries-by-population.php"
-      DATABASE_URL: postgresql+psycopg2://postgres:postgres@postgres:5432/populations_db
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/populations_db
 
   print_data:
     build: .
     command: python print_data.py
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     environment:
-      DATABASE_URL: postgresql+psycopg2://postgres:postgres@postgres:5432/populations_db
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/populations_db
 
 volumes:
   my_db:

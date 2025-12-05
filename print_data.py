@@ -1,19 +1,19 @@
-from sqlalchemy import func
+import asyncio
+
+from sqlalchemy import func, select
 from sqlalchemy.orm import aliased
 from database import SessionLocal, init_db
 from models import Country
-from wait_for_db import wait_for_db
 
 
 class PrintDataService:
-    def __init__(self):
-        init_db()
-
-    def run(self):
-        session = SessionLocal()
-        try:
+    async def run(self):
+        await init_db()
+        async with SessionLocal() as session:
+            largest_country = aliased(Country)
+            smallest_country = aliased(Country)
             pre_query = (
-                session.query(
+                select(
                     Country.region,
                     func.sum(Country.population).label("total_population"),
                     func.max(Country.population).label("max_population"),
@@ -23,11 +23,8 @@ class PrintDataService:
                 .subquery()
             )
 
-            largest_country = aliased(Country)
-            smallest_country = aliased(Country)
-
             query = (
-                session.query(
+                select(
                     pre_query.columns.region,
                     pre_query.columns.total_population,
                     largest_country.name.label("largest_name"),
@@ -48,7 +45,7 @@ class PrintDataService:
                 .order_by(pre_query.columns.region)
             )
 
-            results = query.all()
+            results = await session.execute(query)
 
             for row in results:
                 print(f"Region name: {row.region}")
@@ -59,10 +56,7 @@ class PrintDataService:
                 print(f"Smallest country: {row.min_population:,}")
                 print("")
 
-        finally:
-            session.close()
-
 
 if __name__ == "__main__":
-    wait_for_db()
-    PrintDataService().run()
+    service = PrintDataService()
+    asyncio.run(service.run())

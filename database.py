@@ -1,30 +1,24 @@
-import os
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from sqlalchemy.orm import DeclarativeBase
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, sessionmaker
+DATABASE_URL = "postgresql+asyncpg://postgres:postgres@postgres:5432/populations_db"
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql+psycopg2://postgres:postgres@postgres:5432/populations_db"
-)
-
-engine = create_engine(
+engine = create_async_engine(
     DATABASE_URL,
-    echo=False,
-    future=True
+    echo=False
 )
 
-SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
+SessionLocal = async_sessionmaker(
     bind=engine,
-    future=True
+    expire_on_commit=False
 )
+
 
 class Base(DeclarativeBase):
     pass
 
 
-def init_db():
+async def init_db():
     from models import Country
-    Base.metadata.create_all(bind=engine)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)

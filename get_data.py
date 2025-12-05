@@ -1,24 +1,24 @@
 import os
 
-import requests
+import httpx
 from bs4 import BeautifulSoup
 from sqlalchemy.dialects.postgresql import insert
+import asyncio
 
 from database import SessionLocal, init_db
 from models import Country
-from wait_for_db import wait_for_db
 
 
 class CountryScraper:
     URL = os.environ.get("TARGET_URL")
 
-    def fetch(self):
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"
-        }
-        response = requests.get(self.URL, headers=headers)
-        response.raise_for_status()
-        return response.text
+    async def fetch(self):
+        async with httpx.AsyncClient() as client:
+            response = await client.get(self.URL, headers={
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36"
+            })
+            response.raise_for_status()
+            return response.text
 
     def parse(self, html):
         soup = BeautifulSoup(html, "lxml")
@@ -46,16 +46,15 @@ class CountryScraper:
 
 
 class GetDataService:
-    def __init__(self):
-        init_db()
-        self.scraper = CountryScraper()
+    def __init__(self, scraper):
+        self.scraper = scraper
 
-    def run(self):
-        html = self.scraper.fetch()
+    async def run(self):
+        await init_db()
+        html = await self.scraper.fetch()
         data = self.scraper.parse(html)
 
-        session = SessionLocal()
-        try:
+        async with (SessionLocal() as session):
             for item in data:
                 query = insert(Country).values(
                     name=item["name"],
@@ -64,17 +63,14 @@ class GetDataService:
                 )
                 query = query.on_conflict_do_update(
                     index_elements=["name"],
-                    set_={
-                        "population": query.excluded.population
-                    }
+                    set_={"region": query.excluded.region, "population": query.excluded.population}
                 )
-                session.execute(query)
-            session.commit()
+                await session.execute(query)
+            await session.commit()
             print("Data imported successfully.")
-        finally:
-            session.close()
 
 
 if __name__ == "__main__":
-    wait_for_db()
-    GetDataService().run()
+    scraper = CountryScraper()
+    service = GetDataService(scraper)
+    asyncio.run(service.run())
