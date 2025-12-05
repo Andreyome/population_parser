@@ -48,12 +48,12 @@ class PrintDataService:
             results = await session.execute(query)
 
             for row in results:
-                print(f"Region name: {row.region}")
-                print(f"Total region population: {row.total_population:,}")
-                print(f"Biggest country: {row.largest_name}")
-                print(f"Biggest country population: {row.max_population:,}")
-                print(f"Smallest country: {row.smallest_name}")
-                print(f"Smallest country: {row.min_population:,}")
+                print(f"Назва регіону: {row.region}")
+                print(f"Загальне населення регіону: {row.total_population:,}")
+                print(f"Назва найбільшої країни в регіоні (за населенням): {row.largest_name}")
+                print(f"Населення найбільшої країни в регіоні: {row.max_population:,}")
+                print(f"Назва найменшої країни в регіоні: {row.smallest_name}")
+                print(f"Населення найменшої країни в регіоні: {row.min_population:,}")
                 print("")
 
 
